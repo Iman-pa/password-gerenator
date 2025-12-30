@@ -18,12 +18,11 @@ public class PasswordTest {
 
     @BeforeEach
     public void setup() {
-        password = new Password();
+        password = new Password(2);
     }
 
     @Test
     public void testGenerator() {
-        assertNull(password.getPassword());
         password.generatePass(4);
         assertNotNull(password.getPassword());
         try {
@@ -55,6 +54,7 @@ public class PasswordTest {
     @Test
     public void testInvalidException() {
         try {
+            password.setPassword(null);
             password.isValid();
             fail();
         } catch (NullPasswordException e) {

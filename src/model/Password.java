@@ -13,15 +13,15 @@ public class Password {
     private final static String SYMBOLS = "!@#$%^&*";
 
     // MODIFIES: this
-    // EFFECTS: initializes this Password object with password set to null
-    public Password() {
+    // EFFECTS: initializes this Password object by calling generatePass(length) which 
+            // length is given by the user and is passed to generatorPass
+    public Password(int length) {
         password = null;
+        generatePass(length);
     }
 
     // MODIFIES: this
-    // EFFECTS: generates a new password and assigns it to this.password such that
-    // isValid() would return true for the generated password;
-    // the generated password is non-deterministic and may differ across calls
+    // EFFECTS: generates a new password based on the given length by random
     public void generatePass(int lengthPass) {
         String allChar = DIGITS + UPPERLETTERS + LOWERLETTERS + SYMBOLS;
         StringBuilder pass = new StringBuilder();
@@ -55,9 +55,11 @@ public class Password {
         for (char c : password.toCharArray()) {
             if (Character.isDigit(c)) {
                 hasDigit = true;
-            } else if (!Character.isLetter(c)) {
+            }
+            if (!Character.isLetter(c) && !Character.isDigit(c)) {
                 hasSymbol = true;
-            } else if (Character.isUpperCase(c)) {
+            }
+            if (Character.isUpperCase(c)) {
                 hasUpper = true;
             }
         }
@@ -75,6 +77,7 @@ public class Password {
         this.password = password;
     }
 
+    // EFFECTS: sets password to null
     public void resetPassword() {
         password = null;
     }
