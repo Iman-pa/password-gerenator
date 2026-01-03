@@ -2,6 +2,7 @@ package src.model;
 
 import java.security.SecureRandom;
 
+import src.model.exception.ImpossiblePasswordException;
 import src.model.exception.NullPasswordException;
 
 public class Password {
@@ -11,24 +12,56 @@ public class Password {
     private final static String UPPERLETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXWZ";
     private final static String LOWERLETTERS = "abcdefghijklmnopqrstuvwxyz";
     private final static String SYMBOLS = "!@#$%^&*";
+    private int length;
 
     // MODIFIES: this
     // EFFECTS: initializes this Password object by calling generatePass(length) which 
             // length is given by the user and is passed to generatorPass
-    public Password(int length) {
+    public Password() {
         password = null;
-        generatePass(length);
     }
 
     // MODIFIES: this
-    // EFFECTS: generates a new password based on the given length by random
-    public void generatePass(int lengthPass) {
-        String allChar = DIGITS + UPPERLETTERS + LOWERLETTERS + SYMBOLS;
-        StringBuilder pass = new StringBuilder();
-        for (int i = 0; i < lengthPass; i++) {
-            int index = random.nextInt(allChar.length());
-            pass.append(allChar.charAt(index));
+    // EFFECTS: generate a password based on the choices by the user about length, uppercase, lowercase, digit and symbols.
+    public void generatePass(int lengthPass, boolean upper, boolean lower, boolean digit, boolean symbol) throws ImpossiblePasswordException {
+        if (!upper && !lower && !digit && !symbol) {
+            throw new ImpossiblePasswordException();
         }
+        this.length = lengthPass;
+        String pool = "";
+        StringBuilder pass = new StringBuilder();
+        if (upper) {
+            pass.append(UPPERLETTERS.charAt(random.nextInt(UPPERLETTERS.length())));
+            pool += UPPERLETTERS;
+            lengthPass -= 1;
+        }
+        if (lower) {
+            pass.append(LOWERLETTERS.charAt(random.nextInt(LOWERLETTERS.length())));
+            pool += LOWERLETTERS;
+            lengthPass -= 1;
+        }
+        if (digit) {
+            pass.append(DIGITS.charAt(random.nextInt(DIGITS.length())));
+            pool += DIGITS;
+            lengthPass -= 1;
+        }
+        if (symbol) {
+            pass.append(SYMBOLS.charAt(random.nextInt(SYMBOLS.length())));
+            pool += SYMBOLS;
+            lengthPass -= 1;
+        }
+        for (int i = 0; i < lengthPass; i++) {
+            int index = random.nextInt(pool.length());
+            pass.append(pool.charAt(index));
+        }
+        char[] chars = pass.toString().toCharArray();
+        for (int i = chars.length - 1; i>0; i--) {
+            int j = random.nextInt(i+1);
+            char temp = chars[i];
+            chars[i] = chars[j];
+            chars[j] = temp;
+        }
+        pass = new StringBuilder(new String(chars));
         this.password = pass.toString();
     }
 
@@ -80,6 +113,30 @@ public class Password {
     // EFFECTS: sets password to null
     public void resetPassword() {
         password = null;
+    }
+
+    //EFFECTS: returns the strength of the password, if it's null it returns 0
+    public int getStrength() {
+        if (password == null) {
+            return 0;
+        }
+        int score = 0;
+        if (password.matches(".*[A-Z].*")) {
+            score += 2;
+        }
+        if (password.matches(".*[a-z].*")) {
+            score += 2;
+        }
+        if (password.matches(".*[0-9].*")) {
+            score +=2;
+        }
+        if (password.matches(".*[!@#$%^&*].*")) {
+            score += 2;
+        }
+        if (password.length() > 12) {
+            score +=2;
+        }
+        return score;
     }
 
 }
